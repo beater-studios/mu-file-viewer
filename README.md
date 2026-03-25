@@ -55,6 +55,28 @@ php -S localhost:8080
 
 - `list-unknown-types.sh` — Lists file types in your assets directory that are not yet handled by the viewer. Useful for identifying new formats to support.
 
+## Sample Assets
+
+Don't have MU Online files? Clone one of these repos into the `samples/` directory to try the viewer:
+
+| Repository | Content |
+|-----------|---------|
+| [sven-n/MuMain](https://github.com/sven-n/MuMain) | MU Online client source with BMD models, TGA/OZJ textures, WAV audio |
+| [afrokick/muonlinejs](https://github.com/afrokick/muonlinejs) | Web client with GLB models, OGG audio, PNG textures, OZJ/OZT maps |
+| [Balgas/muonline](https://github.com/Balgas/muonline) | Unity project with FBX models, fonts, textures |
+| [ptr0x-real/xMuPP](https://github.com/ptr0x-real/xMuPP) | Server + tools with MMK thumbnails, EOT/OTF fonts |
+| [MUnique/OpenMU](https://github.com/MUnique/OpenMU) | Open source server with web assets and fonts |
+
+Clone one or more into `samples/`:
+
+```bash
+cd samples
+git clone https://github.com/sven-n/MuMain.git
+git clone https://github.com/afrokick/muonlinejs.git
+```
+
+Then point `$FILES_ROOT` in `config.php` to `samples/` to browse all of them, or to a specific repo folder.
+
 ## Credits
 
 - BMD parser based on [xulek/muonline-bmd-viewer](https://github.com/xulek/muonline-bmd-viewer)
