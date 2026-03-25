@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!grid) return;
 
-  // Queue system to limit concurrent loads (PHP built-in server is single-threaded)
   const MAX_CONCURRENT = 4;
   let activeLoads = 0;
   const queue = [];
@@ -29,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Lazy load thumbnails - only enqueue when visible
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -47,10 +45,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!placeholder) { done(); return; }
 
     const img = new Image();
-    img.src = 'serve_file.php?file=' + encodeURIComponent(filePath);
+    const url = 'serve_file.php?file=' + encodeURIComponent(filePath);
+    img.src = url;
     img.classList.add('file-thumb');
 
-    img.onload = () => { placeholder.replaceWith(img); done(); };
+    img.onload = () => {
+      placeholder.replaceWith(img);
+
+      // Add download button to card
+      const baseName = dlBaseName(card.dataset.name);
+      const ext = filePath.split('.').pop().toLowerCase();
+      card.appendChild(createDlBtn(() => dlFromUrl(url, baseName + '.' + ext)));
+      done();
+    };
     img.onerror = () => {
       placeholder.textContent = 'Error';
       placeholder.classList.add('file-error');
@@ -60,15 +67,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Click to open modal
   grid.addEventListener('click', (e) => {
+    if (e.target.closest('.dl-btn')) return;
     const card = e.target.closest('.img-card');
     if (!card) return;
 
     const filePath = card.dataset.file;
     const size = parseInt(card.dataset.size);
-    const ext = filePath.split('.').pop().toUpperCase();
+    const ext = filePath.split('.').pop();
+    const baseName = dlBaseName(card.dataset.name);
+    const url = 'serve_file.php?file=' + encodeURIComponent(filePath);
 
     const img = new Image();
-    img.src = 'serve_file.php?file=' + encodeURIComponent(filePath);
+    img.src = url;
     img.style.maxWidth = '100%';
     img.style.maxHeight = '70vh';
     img.style.imageRendering = 'pixelated';
@@ -79,11 +89,18 @@ document.addEventListener('DOMContentLoaded', () => {
     modalFilename.textContent = filePath;
 
     img.onload = () => {
-      modalInfo.innerHTML = `
+      modalInfo.innerHTML = '';
+      const spans = document.createElement('div');
+      spans.innerHTML = `
         <span>${img.naturalWidth} x ${img.naturalHeight}</span>
-        <span>${ext}</span>
+        <span>${ext.toUpperCase()}</span>
         <span>${formatSize(size)}</span>
       `;
+      Array.from(spans.children).forEach(s => modalInfo.appendChild(s));
+
+      modalInfo.appendChild(createModalDlBtn(() => {
+        dlFromUrl(url, baseName + '.' + ext.toLowerCase());
+      }));
     };
 
     modal.classList.add('active');

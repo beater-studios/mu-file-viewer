@@ -123,7 +123,11 @@ async function loadBMD(filePath) {
       <span>Animations: ${stats.animations}</span>
     `;
   } catch (error) {
-    viewport.innerHTML = `<div class="fbx-loading fbx-error-msg">Error loading: ${error.message}</div>`;
+    const isDataFile = error.message === 'Invalid BMD header';
+    const msg = isDataFile
+      ? 'Not a 3D model — this BMD file contains encrypted game data (minimap, items, etc.)'
+      : `Error loading: ${error.message}`;
+    viewport.innerHTML = `<div class="fbx-loading fbx-error-msg">${msg}</div>`;
     console.error('BMD load error:', error);
   }
 }

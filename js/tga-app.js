@@ -57,9 +57,15 @@ document.addEventListener('DOMContentLoaded', () => {
       canvas.classList.add('file-thumb');
       placeholder.replaceWith(canvas);
 
-      // Store parsed data for modal
       card._tgaParsed = parsed;
       card._tgaFileSize = buffer.byteLength;
+
+      // Add download button to card
+      const baseName = dlBaseName(card.dataset.name);
+      card.appendChild(createDlBtn(() => {
+        const full = TGAParser.toCanvas(parsed);
+        dlFromCanvas(full, baseName);
+      }));
     } catch (err) {
       placeholder.textContent = 'Error';
       placeholder.title = err.message;
@@ -70,31 +76,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Click to open modal
   grid.addEventListener('click', (e) => {
+    if (e.target.closest('.dl-btn')) return;
     const card = e.target.closest('.file-card');
     if (!card || !card._tgaParsed) return;
 
     const parsed = card._tgaParsed;
     const h = parsed.header;
+    const baseName = dlBaseName(card.dataset.name);
 
     const maxW = Math.min(window.innerWidth - 80, 1200);
-    const canvas = TGAParser.toCanvas(parsed, h.width > maxW ? maxW : null);
+    const fullCanvas = TGAParser.toCanvas(parsed, h.width > maxW ? maxW : null);
 
     modalCanvas.innerHTML = '';
-    modalCanvas.appendChild(canvas);
+    modalCanvas.appendChild(fullCanvas);
 
     modalFilename.textContent = card.dataset.file;
-    modalInfo.innerHTML = `
+    modalInfo.innerHTML = '';
+
+    const infoSpans = document.createElement('span');
+    infoSpans.innerHTML = `
       <span>${h.width} x ${h.height}</span>
       <span>${h.bitsPerPixel}-bit</span>
       <span>${h.imageType === 2 ? 'Uncompressed' : 'RLE'}</span>
       <span>${formatSize(card._tgaFileSize)}</span>
     `;
+    Array.from(infoSpans.children).forEach(s => modalInfo.appendChild(s));
+
+    const dlBtn = createModalDlBtn(() => {
+      const exportCanvas = TGAParser.toCanvas(parsed);
+      dlFromCanvas(exportCanvas, baseName);
+    });
+    modalInfo.appendChild(dlBtn);
 
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
   });
 
-  // Close modal
   function closeModal() {
     modal.classList.remove('active');
     document.body.style.overflow = '';

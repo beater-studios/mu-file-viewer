@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!grid) return;
 
-  // Queue system to limit concurrent loads
   const MAX_CONCURRENT = 4;
   let activeLoads = 0;
   const queue = [];
@@ -40,6 +39,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.querySelectorAll('.oz-card').forEach(card => observer.observe(card));
 
+  function downloadResult(result, baseName) {
+    if (result.element.tagName === 'CANVAS') {
+      dlFromCanvas(result.element, baseName);
+    } else {
+      dlFromImg(result.element, baseName);
+    }
+  }
+
   async function loadThumbnail(card) {
     const filePath = card.dataset.file;
     const placeholder = card.querySelector('.file-placeholder');
@@ -54,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const el = result.element;
       el.classList.add('file-thumb');
 
-      // Scale down for thumbnail
       if (el.tagName === 'CANVAS') {
         el.style.maxWidth = '150px';
         el.style.maxHeight = '150px';
@@ -66,9 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
       placeholder.replaceWith(el);
 
-      // Store data for modal
       card._ozResult = result;
       card._ozBuffer = buffer;
+
+      // Add download button to card
+      const baseName = dlBaseName(card.dataset.name);
+      card.appendChild(createDlBtn(() => downloadResult(result, baseName)));
     } catch (err) {
       placeholder.textContent = 'Error';
       placeholder.title = err.message;
@@ -79,15 +88,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Click to open modal
   grid.addEventListener('click', async (e) => {
+    if (e.target.closest('.dl-btn')) return;
     const card = e.target.closest('.oz-card');
     if (!card) return;
 
     const filePath = card.dataset.file;
     const size = parseInt(card.dataset.size);
+    const baseName = dlBaseName(card.dataset.name);
     modalFilename.textContent = filePath;
     modalCanvas.innerHTML = '';
 
-    // If we already parsed it for thumbnail, re-parse at full size for modal
     try {
       let buffer = card._ozBuffer;
       if (!buffer) {
@@ -96,23 +106,34 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const result = await OZParser.parse(buffer, filePath);
-      const el = result.element.cloneNode(true);
+      let el;
 
-      if (el.tagName === 'CANVAS') {
+      if (result.element.tagName === 'CANVAS') {
+        const src = result.element;
+        el = document.createElement('canvas');
+        el.width = src.width;
+        el.height = src.height;
+        el.getContext('2d').drawImage(src, 0, 0);
         el.style.maxWidth = '100%';
         el.style.imageRendering = 'pixelated';
       } else {
+        el = result.element.cloneNode(true);
         el.style.maxWidth = '100%';
         el.style.maxHeight = '70vh';
       }
 
       modalCanvas.appendChild(el);
 
-      modalInfo.innerHTML = `
+      modalInfo.innerHTML = '';
+      const spans = document.createElement('div');
+      spans.innerHTML = `
         <span>${result.width} x ${result.height}</span>
         <span>${result.format}</span>
         <span>${formatSize(size)}</span>
       `;
+      Array.from(spans.children).forEach(s => modalInfo.appendChild(s));
+
+      modalInfo.appendChild(createModalDlBtn(() => downloadResult(result, baseName)));
     } catch (err) {
       modalCanvas.innerHTML = `<div style="color:#ff6b6b">Error: ${err.message}</div>`;
       modalInfo.innerHTML = `<span>${formatSize(size)}</span>`;

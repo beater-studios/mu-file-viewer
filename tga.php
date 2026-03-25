@@ -3,7 +3,7 @@ require_once __DIR__ . '/config.php';
 
 $pageTitle = 'TGA';
 $activeNav = 'tga';
-$pageJS = ['js/tga-parser.js', 'js/tga-app.js'];
+$pageJS = ['js/download-utils.js', 'js/tga-parser.js', 'js/tga-app.js'];
 
 $realRoot = realpath($FILES_ROOT);
 $tgaFiles = [];

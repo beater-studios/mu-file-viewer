@@ -520,6 +520,65 @@ h2 {
   vertical-align: middle;
 }
 
+/* Download button */
+.dl-btn {
+  background: none;
+  border: 1px solid #2a3a5c;
+  color: #556;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.dl-btn:hover {
+  color: #7fbbff;
+  border-color: #7fbbff;
+}
+
+.dl-btn svg {
+  pointer-events: none;
+}
+
+.file-card .dl-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.file-card:hover .dl-btn {
+  opacity: 1;
+}
+
+.file-card {
+  position: relative;
+}
+
+.modal-dl-btn {
+  background: #0f1729;
+  border: 1px solid #2a3a5c;
+  color: #7fbbff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s;
+}
+
+.modal-dl-btn:hover {
+  background: #1a2540;
+}
+
 /* Empty state */
 .empty-state {
   text-align: center;
