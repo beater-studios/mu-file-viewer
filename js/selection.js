@@ -13,15 +13,17 @@ function initSelection(gridId, cardSelector) {
   let toolbar = null;
 
   // "Select all" button in the file-count bar (always visible)
-  const countBar = grid.previousElementSibling;
-  if (countBar && countBar.classList.contains('file-count')) {
+  const countBar = grid.parentNode.querySelector('.file-count');
+  if (countBar) {
     const selectAllPermanent = document.createElement('button');
     selectAllPermanent.className = 'group-toggle-btn';
     selectAllPermanent.innerHTML = CHECK_ICON + ' Select all';
     selectAllPermanent.addEventListener('click', () => {
       grid.querySelectorAll(cardSelector).forEach(card => {
-        selected.add(card);
-        card.classList.add('selected');
+        if (card.style.display !== 'none') {
+          selected.add(card);
+          card.classList.add('selected');
+        }
       });
       syncToolbar();
     });
@@ -88,8 +90,8 @@ function initSelection(gridId, cardSelector) {
       e.stopPropagation();
       const group = header.closest('.dir-group');
       if (!group) return;
-      const cards = group.querySelectorAll(cardSelector);
-      const allSelected = Array.from(cards).every(c => selected.has(c));
+      const cards = Array.from(group.querySelectorAll(cardSelector)).filter(c => c.style.display !== 'none');
+      const allSelected = cards.every(c => selected.has(c));
       cards.forEach(c => {
         if (allSelected) {
           selected.delete(c);
