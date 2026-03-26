@@ -3,7 +3,7 @@ require_once __DIR__ . '/config.php';
 
 $pageTitle = 'Images';
 $activeNav = 'images';
-$pageJS = ['js/download-utils.js', 'js/images-app.js'];
+$pageJS = ['js/download-utils.js', 'js/group-toggle.js', 'js/selection.js', 'js/images-app.js'];
 
 $realRoot = realpath($FILES_ROOT);
 $imageFiles = [];

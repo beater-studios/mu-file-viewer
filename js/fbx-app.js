@@ -187,3 +187,6 @@ window.addEventListener('resize', () => {
     renderer.setSize(viewport.clientWidth, viewport.clientHeight);
   }
 });
+
+initGroupToggle('file-grid', '.fbx-card');
+initSelection('file-grid', '.fbx-card');

@@ -30,8 +30,8 @@ class TGAParser {
       throw new Error(`Unsupported TGA image type: ${header.imageType} (only type 2 and 10 supported)`);
     }
 
-    if (![24, 32].includes(header.bitsPerPixel)) {
-      throw new Error(`Unsupported bit depth: ${header.bitsPerPixel} (only 24 and 32 supported)`);
+    if (![16, 24, 32].includes(header.bitsPerPixel)) {
+      throw new Error(`Unsupported bit depth: ${header.bitsPerPixel} (only 16, 24 and 32 supported)`);
     }
 
     const bytesPerPixel = header.bitsPerPixel / 8;
@@ -45,15 +45,31 @@ class TGAParser {
 
     const imageData = new Uint8Array(pixelCount * 4); // RGBA
 
+    // Helper to decode a 16-bit TGA pixel (XRRRRRGGGGGBBBBB → RGBA)
+    // Most 16-bit TGA files don't actually use the alpha bit, so default to opaque
+    function read16(srcIdx, dstIdx) {
+      const lo = data[srcIdx];
+      const hi = data[srcIdx + 1];
+      const pixel = lo | (hi << 8);
+      imageData[dstIdx]     = ((pixel >> 10) & 0x1F) * 255 / 31 | 0; // R
+      imageData[dstIdx + 1] = ((pixel >> 5) & 0x1F) * 255 / 31 | 0;  // G
+      imageData[dstIdx + 2] = (pixel & 0x1F) * 255 / 31 | 0;         // B
+      imageData[dstIdx + 3] = 255; // Always opaque for 16-bit
+    }
+
     if (header.imageType === 2) {
       // Uncompressed
       for (let i = 0; i < pixelCount; i++) {
         const srcIdx = offset + i * bytesPerPixel;
         const dstIdx = i * 4;
-        imageData[dstIdx] = data[srcIdx + 2];     // R (TGA is BGR)
-        imageData[dstIdx + 1] = data[srcIdx + 1]; // G
-        imageData[dstIdx + 2] = data[srcIdx];     // B
-        imageData[dstIdx + 3] = bytesPerPixel === 4 ? data[srcIdx + 3] : 255; // A
+        if (bytesPerPixel === 2) {
+          read16(srcIdx, dstIdx);
+        } else {
+          imageData[dstIdx] = data[srcIdx + 2];     // R (TGA is BGR)
+          imageData[dstIdx + 1] = data[srcIdx + 1]; // G
+          imageData[dstIdx + 2] = data[srcIdx];     // B
+          imageData[dstIdx + 3] = bytesPerPixel === 4 ? data[srcIdx + 3] : 255; // A
+        }
       }
     } else if (header.imageType === 10) {
       // RLE compressed
@@ -64,10 +80,18 @@ class TGAParser {
         const isRLE = (packet & 0x80) !== 0;
 
         if (isRLE) {
-          const b = data[offset];
-          const g = data[offset + 1];
-          const r = data[offset + 2];
-          const a = bytesPerPixel === 4 ? data[offset + 3] : 255;
+          let r, g, b, a;
+          if (bytesPerPixel === 2) {
+            const lo = data[offset]; const hi = data[offset + 1];
+            const pixel = lo | (hi << 8);
+            r = ((pixel >> 10) & 0x1F) * 255 / 31 | 0;
+            g = ((pixel >> 5) & 0x1F) * 255 / 31 | 0;
+            b = (pixel & 0x1F) * 255 / 31 | 0;
+            a = 255;
+          } else {
+            b = data[offset]; g = data[offset + 1]; r = data[offset + 2];
+            a = bytesPerPixel === 4 ? data[offset + 3] : 255;
+          }
           offset += bytesPerPixel;
 
           for (let i = 0; i < count && pixelIndex < pixelCount; i++, pixelIndex++) {
@@ -80,10 +104,14 @@ class TGAParser {
         } else {
           for (let i = 0; i < count && pixelIndex < pixelCount; i++, pixelIndex++) {
             const dstIdx = pixelIndex * 4;
-            imageData[dstIdx] = data[offset + 2];     // R
-            imageData[dstIdx + 1] = data[offset + 1]; // G
-            imageData[dstIdx + 2] = data[offset];     // B
-            imageData[dstIdx + 3] = bytesPerPixel === 4 ? data[offset + 3] : 255;
+            if (bytesPerPixel === 2) {
+              read16(offset, dstIdx);
+            } else {
+              imageData[dstIdx] = data[offset + 2];     // R
+              imageData[dstIdx + 1] = data[offset + 1]; // G
+              imageData[dstIdx + 2] = data[offset];     // B
+              imageData[dstIdx + 3] = bytesPerPixel === 4 ? data[offset + 3] : 255;
+            }
             offset += bytesPerPixel;
           }
         }

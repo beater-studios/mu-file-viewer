@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+  initGroupToggle('font-list', '.font-item');
+  initSelection('font-list', '.font-item');
 
   /**
    * Extract TTF font data from EOT (Embedded OpenType) container.

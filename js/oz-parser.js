@@ -16,6 +16,10 @@ class OZParser {
     }
 
     if (jpegStart === -1) {
+      // Some .OZJ files are actually TGA with wrong extension — try TGA fallback
+      if (data.length > 18 && (data[2] === 2 || data[2] === 10)) {
+        return { tgaFallback: true };
+      }
       throw new Error('JPEG marker not found in OZJ file');
     }
 
@@ -86,18 +90,19 @@ class OZParser {
       throw new Error(`Invalid OZT dimensions: ${width}x${height}`);
     }
 
-    if (depth !== 32) {
-      throw new Error(`Unsupported OZT depth: ${depth} (expected 32)`);
+    if (depth !== 32 && depth !== 24) {
+      throw new Error(`Unsupported OZT depth: ${depth} (expected 24 or 32)`);
     }
 
+    const bytesPerPixel = depth / 8;
     const pixelDataOffset = 22;
-    const expectedSize = pixelDataOffset + (width * height * 4);
+    const expectedSize = pixelDataOffset + (width * height * bytesPerPixel);
 
     if (data.length < expectedSize) {
       throw new Error(`OZT file truncated: expected ${expectedSize} bytes, got ${data.length}`);
     }
 
-    // Create canvas and convert BGRA (bottom-up) to RGBA
+    // Create canvas and convert BGR/BGRA (bottom-up) to RGBA
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -105,18 +110,17 @@ class OZParser {
     const imageData = ctx.createImageData(width, height);
 
     for (let y = 0; y < height; y++) {
-      // Bottom-up: read from last row first
-      const srcRow = (height - 1 - y) * width * 4 + pixelDataOffset;
+      const srcRow = (height - 1 - y) * width * bytesPerPixel + pixelDataOffset;
       const dstRow = y * width * 4;
 
       for (let x = 0; x < width; x++) {
-        const srcIdx = srcRow + x * 4;
+        const srcIdx = srcRow + x * bytesPerPixel;
         const dstIdx = dstRow + x * 4;
 
         imageData.data[dstIdx]     = data[srcIdx + 2]; // R (from B)
         imageData.data[dstIdx + 1] = data[srcIdx + 1]; // G
         imageData.data[dstIdx + 2] = data[srcIdx];     // B (from R)
-        imageData.data[dstIdx + 3] = data[srcIdx + 3]; // A
+        imageData.data[dstIdx + 3] = bytesPerPixel === 4 ? data[srcIdx + 3] : 255; // A
       }
     }
 
@@ -140,6 +144,19 @@ class OZParser {
 
     if (ext === 'ozj' || ext === 'ozj2') {
       const result = this.parseOZJ(buffer);
+
+      // TGA fallback: some .OZJ files are actually TGA with wrong extension
+      if (result.tgaFallback && typeof TGAParser !== 'undefined') {
+        const parsed = TGAParser.parse(buffer);
+        const canvas = TGAParser.toCanvas(parsed);
+        return Promise.resolve({
+          element: canvas,
+          format: 'OZJ (TGA fallback)',
+          width: parsed.header.width,
+          height: parsed.header.height
+        });
+      }
+
       const img = new Image();
       img.src = result.url;
       return new Promise((resolve, reject) => {

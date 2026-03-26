@@ -180,3 +180,6 @@ window.addEventListener('resize', () => {
     renderer.setSize(viewport.clientWidth, viewport.clientHeight);
   }
 });
+
+initGroupToggle('file-grid', '.glb-card');
+initSelection('file-grid', '.glb-card');

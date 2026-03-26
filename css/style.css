@@ -165,6 +165,251 @@ h2 {
   color: #888;
   font-size: 0.85rem;
   margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Group toggle */
+.group-toggle-btn {
+  background: #0f1729;
+  border: 1px solid #2a3a5c;
+  color: #888;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.group-toggle-btn:hover {
+  color: #7fbbff;
+  border-color: #7fbbff;
+}
+
+.group-toggle-btn.active {
+  color: #7fbbff;
+  border-color: #7fbbff;
+  background: #16213e;
+}
+
+/* Search bar */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #16213e;
+  border: 1px solid #2a3a5c;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  color: #556;
+}
+
+.search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: #e0e0e0;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: #556;
+}
+
+/* Directory groups */
+.file-grid.grouped {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.dir-group {
+  margin-bottom: 20px;
+}
+
+.dir-group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #0f1729;
+  border: 1px solid #2a3a5c;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  color: #7fbbff;
+  font-size: 0.8rem;
+  position: sticky;
+  top: 50px;
+  z-index: 10;
+  cursor: pointer;
+  user-select: none;
+}
+
+.dir-group-header:hover {
+  border-color: #3a5a8c;
+}
+
+.dir-group-header .chevron {
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.dir-group.collapsed .dir-group-header .chevron {
+  transform: rotate(-90deg);
+}
+
+.dir-group.collapsed .dir-group-grid {
+  display: none;
+}
+
+.dir-group-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dir-group-count {
+  background: #2a3a5c;
+  color: #aaa;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+
+.dir-group-grid {
+  gap: 12px;
+}
+
+/* Selection */
+.select-checkbox {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 22px;
+  height: 22px;
+  border: 1px solid #2a3a5c;
+  border-radius: 4px;
+  background: #0f1729;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, border-color 0.15s;
+  z-index: 5;
+  color: transparent;
+}
+
+.file-card:hover .select-checkbox,
+.audio-item:hover .select-checkbox,
+.font-item:hover .select-checkbox,
+.selected .select-checkbox {
+  opacity: 1;
+}
+
+.selected .select-checkbox {
+  background: #7fbbff;
+  border-color: #7fbbff;
+  color: #0f1729;
+}
+
+.file-card.selected,
+.audio-item.selected,
+.font-item.selected {
+  border-color: #7fbbff;
+  box-shadow: 0 0 0 1px #7fbbff;
+}
+
+.audio-item,
+.font-item {
+  position: relative;
+}
+
+.audio-item .select-checkbox,
+.font-item .select-checkbox {
+  position: absolute;
+  top: 50%;
+  left: 8px;
+  transform: translateY(-50%);
+}
+
+.selection-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #16213e;
+  border: 1px solid #7fbbff;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  position: fixed;
+  bottom: 44px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  box-shadow: 0 -2px 20px rgba(0,0,0,0.5);
+  max-width: 90vw;
+}
+
+.sel-count {
+  color: #7fbbff;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.sel-btn {
+  background: #0f1729;
+  border: 1px solid #2a3a5c;
+  color: #888;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.sel-btn:hover {
+  color: #ccc;
+  border-color: #556;
+}
+
+.sel-delete-btn {
+  color: #ff6b6b;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.sel-delete-btn:hover {
+  color: #ff4444;
+  border-color: #ff6b6b;
+}
+
+.select-group-btn {
+  background: none;
+  border: 1px solid #2a3a5c;
+  color: #888;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.65rem;
+  transition: color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.select-group-btn:hover {
+  color: #7fbbff;
+  border-color: #7fbbff;
 }
 
 /* File grid */

@@ -175,3 +175,6 @@ window.addEventListener('resize', () => {
     renderer.setSize(viewport.clientWidth, viewport.clientHeight);
   }
 });
+
+initGroupToggle('file-grid', '.bmd-card');
+initSelection('file-grid', '.bmd-card');

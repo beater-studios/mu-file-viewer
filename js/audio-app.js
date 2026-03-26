@@ -2,6 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const list = document.getElementById('audio-list');
   if (!list) return;
 
+  initGroupToggle('audio-list', '.audio-item');
+  initSelection('audio-list', '.audio-item');
+
   let currentlyPlaying = null;
 
   list.addEventListener('click', (e) => {

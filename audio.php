@@ -3,7 +3,7 @@ require_once __DIR__ . '/config.php';
 
 $pageTitle = 'Audio';
 $activeNav = 'audio';
-$pageJS = ['js/audio-app.js'];
+$pageJS = ['js/group-toggle.js', 'js/selection.js', 'js/audio-app.js'];
 
 $realRoot = realpath($FILES_ROOT);
 $audioFiles = [];

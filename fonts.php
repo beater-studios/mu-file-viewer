@@ -3,7 +3,7 @@ require_once __DIR__ . '/config.php';
 
 $pageTitle = 'Fonts';
 $activeNav = 'fonts';
-$pageJS = ['js/fonts-app.js'];
+$pageJS = ['js/group-toggle.js', 'js/selection.js', 'js/fonts-app.js'];
 
 $realRoot = realpath($FILES_ROOT);
 $fontFiles = [];

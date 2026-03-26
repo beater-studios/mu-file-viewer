@@ -61,6 +61,8 @@ include __DIR__ . '/includes/header.php';
     </div>
 </div>
 
+<script src="js/group-toggle.js"></script>
+<script src="js/selection.js"></script>
 <script type="importmap">
 {
     "imports": {
