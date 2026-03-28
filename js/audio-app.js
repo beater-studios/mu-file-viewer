@@ -5,9 +5,45 @@ document.addEventListener('DOMContentLoaded', () => {
   initGroupToggle('audio-list', '.audio-item');
   initSelection('audio-list', '.audio-item');
 
+  // Add download buttons and load duration for each audio item
+  list.querySelectorAll('.audio-item').forEach(item => {
+    const filePath = item.dataset.file;
+    const ext = filePath.split('.').pop().toLowerCase();
+    const baseName = dlBaseName(filePath.split('/').pop());
+    const url = 'serve_file.php?file=' + encodeURIComponent(filePath);
+
+    // Duration label
+    const durEl = document.createElement('div');
+    durEl.className = 'audio-duration';
+    durEl.textContent = '--:--';
+    item.querySelector('.audio-size').insertAdjacentElement('beforebegin', durEl);
+
+    // Load metadata to get duration
+    const audio = item.querySelector('audio');
+    audio.addEventListener('loadedmetadata', () => {
+      durEl.textContent = formatDuration(audio.duration);
+    });
+    // Trigger metadata load
+    audio.preload = 'metadata';
+    if (!audio.src && audio.querySelector('source')) {
+      audio.load();
+    }
+
+    const dlBtn = createDlBtn(() => dlFromUrl(url, baseName + '.' + ext));
+    item.appendChild(dlBtn);
+  });
+
+  function formatDuration(seconds) {
+    if (!seconds || !isFinite(seconds)) return '--:--';
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
   let currentlyPlaying = null;
 
   list.addEventListener('click', (e) => {
+    if (e.target.closest('.dl-btn')) return;
     const btn = e.target.closest('.audio-play-btn');
     if (!btn) return;
 

@@ -342,6 +342,24 @@ h2 {
   transform: translateY(-50%);
 }
 
+.audio-item .dl-btn {
+  position: static;
+  opacity: 0;
+}
+
+.audio-item:hover .dl-btn {
+  opacity: 1;
+}
+
+.font-header .dl-btn {
+  position: static;
+  opacity: 0;
+}
+
+.font-item:hover .font-header .dl-btn {
+  opacity: 1;
+}
+
 .selection-toolbar {
   display: flex;
   align-items: center;
@@ -671,6 +689,14 @@ h2 {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.audio-duration {
+  font-size: 0.75rem;
+  color: #7fbbff;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .audio-size {

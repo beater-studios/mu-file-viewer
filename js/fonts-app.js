@@ -21,6 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const preview = item.querySelector('.font-preview');
     const nameEl = item.querySelector('.font-name');
     const isEot = filePath.toLowerCase().endsWith('.eot');
+    const ext = filePath.split('.').pop().toLowerCase();
+    const baseName = dlBaseName(filePath.split('/').pop());
+
+    // Add download button
+    const dlBtnEl = createDlBtn(() => dlFromUrl(url, baseName + '.' + ext));
+    item.querySelector('.font-header').appendChild(dlBtnEl);
 
     preview.style.opacity = '0.3';
 
