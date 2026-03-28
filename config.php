@@ -2,10 +2,4 @@
 
 // Root directory where the MU Online files are located
 // Change to the absolute path of your files folder
-$FILES_ROOT = __DIR__ . '/samples/muonlinejs';
-
-// muonlinejs - OK
-// muonline
-// OpenMU - OK
-// xMuPP - OK
-// MuMain
+$FILES_ROOT = __DIR__ . '/samples';
