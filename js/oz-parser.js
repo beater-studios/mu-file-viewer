@@ -64,6 +64,11 @@ class OZParser {
       throw new Error('OZB file too small');
     }
 
+    // Verify BMP header exists after skipping 4 bytes
+    if (data[4] !== 0x42 || data[5] !== 0x4D) { // 'BM'
+      throw new Error('Not a valid OZB file (no BMP data found)');
+    }
+
     const bmpData = data.slice(4);
     const blob = new Blob([bmpData], { type: 'image/bmp' });
     return { url: URL.createObjectURL(blob), format: 'OZB (BMP)', cleanup: true };
