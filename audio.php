@@ -15,7 +15,7 @@ if ($realRoot && is_dir($realRoot)) {
     );
 
     foreach ($iterator as $file) {
-        if (in_array(strtolower($file->getExtension()), ['wav', 'ogg'])) {
+        if (in_array(strtolower($file->getExtension()), ['wav', 'ogg', 'mp3'])) {
             $relativePath = substr($file->getPathname(), strlen($realRoot) + 1);
             $audioFiles[] = ['path' => $relativePath, 'size' => $file->getSize()];
         }
@@ -50,7 +50,11 @@ include __DIR__ . '/includes/header.php';
             <div class="audio-size"><?php echo formatFileSize($file['size']); ?></div>
             <audio preload="none">
                 <?php $audioExt = strtolower(pathinfo($file['path'], PATHINFO_EXTENSION)); ?>
-                <source src="serve_file.php?file=<?php echo urlencode($file['path']); ?>" type="audio/<?php echo $audioExt === 'ogg' ? 'ogg' : 'wav'; ?>">
+                <?php
+                    $mimeMap = ['ogg' => 'audio/ogg', 'wav' => 'audio/wav', 'mp3' => 'audio/mpeg'];
+                    $mime = $mimeMap[$audioExt] ?? 'audio/mpeg';
+                ?>
+                <source src="serve_file.php?file=<?php echo urlencode($file['path']); ?>" type="<?php echo $mime; ?>">
             </audio>
         </div>
     <?php endforeach; ?>

@@ -204,6 +204,53 @@ class OZParser {
         } else if (data.length >= 2 && data[0] === 0x42 && data[1] === 0x4D) {
           format = 'BMP';
           mimeType = 'image/bmp';
+        } else if (data.length >= 4 && data[0] === 0x44 && data[1] === 0x44 && data[2] === 0x53 && data[3] === 0x20) {
+          format = 'DDS';
+        }
+
+        // Handle DDS format (detected magic bytes)
+        if (format === 'DDS') {
+          if (typeof DDSParser === 'undefined') {
+            return Promise.reject(new Error('DDSParser not loaded'));
+          }
+          try {
+            const arrayBuf = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+            const parsed = DDSParser.parse(arrayBuf);
+            const canvas = DDSParser.toCanvas(parsed);
+            return Promise.resolve({
+              element: canvas,
+              format: `OZD (DDS ${parsed.format})`,
+              width: parsed.width,
+              height: parsed.height
+            });
+          } catch (ddsErr) {
+            // DDS detected but format unsupported — offer .dds download
+            const card = document.createElement('div');
+            card.className = 'ozd-unknown-card';
+            card.innerHTML = `
+              <div class="ozd-header">OZD (DDS — ${ddsErr.message})</div>
+              <div class="ozd-details">
+                <p><strong>Algorithm 1 (payload):</strong> ${result.algorithm1Name}</p>
+                <p><strong>Algorithm 2 (header):</strong> ${result.algorithm2Name}</p>
+                <p><strong>Decrypted size:</strong> ${data.length} bytes</p>
+              </div>
+              <button class="ozd-download-btn">Download .dds</button>
+            `;
+            const btn = card.querySelector('.ozd-download-btn');
+            btn.onclick = () => {
+              const blob = new Blob([data], { type: 'image/vnd.ms-dds' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = filename.replace(/\.ozd$/i, '') + '.dds';
+              a.click();
+              URL.revokeObjectURL(url);
+            };
+            return Promise.resolve({
+              element: card,
+              format: 'OZD (DDS unsupported)'
+            });
+          }
         }
 
         if (format !== 'Unknown') {
@@ -231,8 +278,8 @@ class OZParser {
           card.innerHTML = `
             <div class="ozd-header">OZD (Unknown Image Format)</div>
             <div class="ozd-details">
-              <p><strong>Algorithm 1 (payload):</strong> ${result.algorithm2}</p>
-              <p><strong>Algorithm 2 (header):</strong> ${result.algorithm1}</p>
+              <p><strong>Algorithm 1 (payload):</strong> ${result.algorithm1Name}</p>
+              <p><strong>Algorithm 2 (header):</strong> ${result.algorithm2Name}</p>
               <p><strong>Decrypted size:</strong> ${data.length} bytes</p>
             </div>
             <button class="ozd-download-btn">Download</button>

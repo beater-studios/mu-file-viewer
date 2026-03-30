@@ -59,18 +59,22 @@ document.addEventListener('DOMContentLoaded', () => {
       const result = await OZParser.parse(buffer, filePath);
 
       const el = result.element;
-      el.classList.add('file-thumb');
 
-      if (el.tagName === 'CANVAS') {
-        el.style.maxWidth = '150px';
-        el.style.maxHeight = '150px';
+      let thumbEl;
+      if (el.tagName === 'DIV') {
+        // Unknown/unsupported format — show a compact label in the grid, full card in modal
+        thumbEl = document.createElement('div');
+        thumbEl.className = 'file-thumb file-unknown-thumb';
+        thumbEl.textContent = result.format || 'Unknown';
       } else {
-        el.style.maxWidth = '150px';
-        el.style.maxHeight = '150px';
-        el.style.objectFit = 'contain';
+        thumbEl = el;
+        thumbEl.classList.add('file-thumb');
+        thumbEl.style.maxWidth = '150px';
+        thumbEl.style.maxHeight = '150px';
+        if (thumbEl.tagName !== 'CANVAS') thumbEl.style.objectFit = 'contain';
       }
 
-      placeholder.replaceWith(el);
+      placeholder.replaceWith(thumbEl);
 
       card._ozResult = result;
       card._ozBuffer = buffer;

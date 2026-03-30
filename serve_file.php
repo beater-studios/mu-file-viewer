@@ -4,7 +4,7 @@ require_once __DIR__ . '/config.php';
 $requestedFile = isset($_GET['file']) ? $_GET['file'] : '';
 $requestedFile = str_replace(['..', "\0"], '', $requestedFile);
 
-$allowedExtensions = ['tga', 'fbx', 'glb', 'bmd', 'jpg', 'jpeg', 'png', 'bmp', 'ico', 'webp', 'gif', 'svg', 'ozj', 'ozj2', 'ozb', 'ozt', 'mmk', 'ozp', 'ozd', 'wav', 'ogg', 'ttf', 'woff', 'woff2', 'otf', 'eot'];
+$allowedExtensions = ['tga', 'fbx', 'glb', 'bmd', 'jpg', 'jpeg', 'png', 'bmp', 'ico', 'webp', 'gif', 'svg', 'ozj', 'ozj2', 'ozb', 'ozt', 'mmk', 'ozp', 'ozd', 'wav', 'ogg', 'mp3', 'ttf', 'woff', 'woff2', 'otf', 'eot'];
 
 $contentTypes = [
     'jpg'  => 'image/jpeg',
@@ -20,6 +20,7 @@ $contentTypes = [
     'fbx'  => 'application/octet-stream',
     'glb'  => 'model/gltf-binary',
     'ogg'  => 'audio/ogg',
+    'mp3'  => 'audio/mpeg',
     'ttf'  => 'font/ttf',
     'woff' => 'font/woff',
     'woff2'=> 'font/woff2',

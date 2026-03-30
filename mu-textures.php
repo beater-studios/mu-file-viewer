@@ -3,7 +3,7 @@ require_once __DIR__ . '/config.php';
 
 $pageTitle = 'MU Textures';
 $activeNav = 'mu-textures';
-$pageJS = ['js/download-utils.js', 'js/group-toggle.js', 'js/selection.js', 'js/tga-parser.js', 'js/ozg-parser.js', 'js/oz-parser.js', 'js/mu-textures-app.js'];
+$pageJS = ['js/download-utils.js', 'js/group-toggle.js', 'js/selection.js', 'js/tga-parser.js', 'js/ozg-parser.js', 'js/dds-parser.js', 'js/oz-parser.js', 'js/mu-textures-app.js'];
 
 $realRoot = realpath($FILES_ROOT);
 $ozFiles = [];
