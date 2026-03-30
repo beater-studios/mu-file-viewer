@@ -141,11 +141,121 @@ class OZParser {
   }
 
   /**
+   * Parse OZP file (PNG with 4-byte prefix)
+   * First 4 bytes are duplicate PNG magic; actual PNG starts at offset 4
+   */
+  static parseOZP(buffer) {
+    const data = new Uint8Array(buffer);
+
+    if (data.length < 8) {
+      throw new Error('OZP file too small');
+    }
+
+    // OZP = PNG with 4-byte prefix, actual PNG starts at offset 4
+    const pngData = data.slice(4);
+    const blob = new Blob([pngData], { type: 'image/png' });
+    return { url: URL.createObjectURL(blob), format: 'OZP (PNG)', cleanup: true };
+  }
+
+  /**
    * Auto-detect format by extension and parse
    * Returns { element, format, width?, height?, cleanup? }
    */
   static parse(buffer, filename) {
     const ext = filename.split('.').pop().toLowerCase();
+
+    if (ext === 'ozp') {
+      const result = this.parseOZP(buffer);
+      const img = new Image();
+      img.src = result.url;
+      return new Promise((resolve, reject) => {
+        img.onload = () => resolve({
+          element: img,
+          format: result.format,
+          width: img.naturalWidth,
+          height: img.naturalHeight,
+          blobUrl: result.url
+        });
+        img.onerror = () => {
+          URL.revokeObjectURL(result.url);
+          reject(new Error('Failed to decode PNG from OZP'));
+        };
+      });
+    }
+
+    if (ext === 'ozd') {
+      if (typeof OZGParser === 'undefined') {
+        return Promise.reject(new Error('OZGParser not loaded'));
+      }
+      try {
+        const result = OZGParser.parseOZD(buffer);
+        const data = result.imageData;
+
+        // Try to detect image format from magic bytes
+        let format = 'Unknown';
+        let mimeType = 'application/octet-stream';
+
+        if (data.length >= 4 && data[0] === 0x89 && data[1] === 0x50 && data[2] === 0x4E && data[3] === 0x47) {
+          format = 'PNG';
+          mimeType = 'image/png';
+        } else if (data.length >= 3 && data[0] === 0xFF && data[1] === 0xD8 && data[2] === 0xFF) {
+          format = 'JPEG';
+          mimeType = 'image/jpeg';
+        } else if (data.length >= 2 && data[0] === 0x42 && data[1] === 0x4D) {
+          format = 'BMP';
+          mimeType = 'image/bmp';
+        }
+
+        if (format !== 'Unknown') {
+          const blob = new Blob([data], { type: mimeType });
+          const url = URL.createObjectURL(blob);
+          const img = new Image();
+          img.src = url;
+          return new Promise((resolve, reject) => {
+            img.onload = () => resolve({
+              element: img,
+              format: `OZD (${format})`,
+              width: img.naturalWidth,
+              height: img.naturalHeight,
+              blobUrl: url
+            });
+            img.onerror = () => {
+              URL.revokeObjectURL(url);
+              reject(new Error(`Failed to decode ${format} from OZD`));
+            };
+          });
+        } else {
+          // Can't identify format, offer as download
+          const card = document.createElement('div');
+          card.className = 'ozd-unknown-card';
+          card.innerHTML = `
+            <div class="ozd-header">OZD (Unknown Image Format)</div>
+            <div class="ozd-details">
+              <p><strong>Algorithm 1 (payload):</strong> ${result.algorithm2}</p>
+              <p><strong>Algorithm 2 (header):</strong> ${result.algorithm1}</p>
+              <p><strong>Decrypted size:</strong> ${data.length} bytes</p>
+            </div>
+            <button class="ozd-download-btn">Download</button>
+          `;
+          const btn = card.querySelector('.ozd-download-btn');
+          btn.onclick = () => {
+            const blob = new Blob([data], { type: 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename + '.bin';
+            a.click();
+            URL.revokeObjectURL(url);
+          };
+          return Promise.resolve({
+            element: card,
+            format: 'OZD (Unknown)'
+          });
+        }
+      } catch (e) {
+        return Promise.reject(new Error(`Failed to decrypt OZD: ${e.message}`));
+      }
+    }
 
     if (ext === 'ozj' || ext === 'ozj2') {
       const result = this.parseOZJ(buffer);

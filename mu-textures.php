@@ -3,11 +3,11 @@ require_once __DIR__ . '/config.php';
 
 $pageTitle = 'MU Textures';
 $activeNav = 'mu-textures';
-$pageJS = ['js/download-utils.js', 'js/group-toggle.js', 'js/selection.js', 'js/tga-parser.js', 'js/oz-parser.js', 'js/mu-textures-app.js'];
+$pageJS = ['js/download-utils.js', 'js/group-toggle.js', 'js/selection.js', 'js/tga-parser.js', 'js/ozg-parser.js', 'js/oz-parser.js', 'js/mu-textures-app.js'];
 
 $realRoot = realpath($FILES_ROOT);
 $ozFiles = [];
-$ozExtensions = ['ozj', 'ozj2', 'ozb', 'ozt', 'mmk'];
+$ozExtensions = ['ozj', 'ozj2', 'ozb', 'ozt', 'mmk', 'ozp', 'ozd'];
 
 if ($realRoot && is_dir($realRoot)) {
     $iterator = new RecursiveIteratorIterator(
@@ -29,7 +29,7 @@ if ($realRoot && is_dir($realRoot)) {
 include __DIR__ . '/includes/header.php';
 ?>
 
-<h2>MU Textures (OZJ / OZB / OZT / MMK)</h2>
+<h2>MU Textures (OZJ / OZB / OZT / MMK / OZP / OZD)</h2>
 <p class="root-path">Root: <code><?php echo htmlspecialchars($FILES_ROOT); ?></code></p>
 
 <?php if (!empty($ozFiles)): ?>

@@ -903,3 +903,72 @@ h2 {
   color: #e0e0e0;
   text-decoration: none;
 }
+
+/* OZG and OZD Card Styles */
+.ozg-info-card,
+.ozd-unknown-card {
+  background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+  border: 1px solid #2a5a8a;
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 200px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.ozg-header,
+.ozd-header {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #7fbbff;
+  border-bottom: 1px solid #2a5a8a;
+  padding-bottom: 8px;
+  width: 100%;
+}
+
+.ozg-details,
+.ozd-details {
+  font-size: 0.85rem;
+  color: #b0b8c8;
+  width: 100%;
+}
+
+.ozg-details p,
+.ozd-details p {
+  margin: 4px 0;
+  line-height: 1.4;
+}
+
+.ozg-details strong,
+.ozd-details strong {
+  color: #7fbbff;
+}
+
+.ozg-download-btn,
+.ozd-download-btn {
+  background: #2a5a8a;
+  border: 1px solid #3a7aaa;
+  color: #7fbbff;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.15s;
+  margin-top: 8px;
+}
+
+.ozg-download-btn:hover,
+.ozd-download-btn:hover {
+  background: #3a7aaa;
+  color: #fff;
+  border-color: #5a9aca;
+}
+
+.ozg-download-btn:active,
+.ozd-download-btn:active {
+  background: #1a4a7a;
+}
