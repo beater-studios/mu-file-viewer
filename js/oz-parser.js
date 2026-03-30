@@ -60,16 +60,20 @@ class OZParser {
   static parseOZB(buffer) {
     const data = new Uint8Array(buffer);
 
-    if (data.length < 5) {
+    if (data.length < 6) {
       throw new Error('OZB file too small');
     }
 
-    // Verify BMP header exists after skipping 4 bytes
-    if (data[4] !== 0x42 || data[5] !== 0x4D) { // 'BM'
+    // BMP can be at offset 4 (standard OZB) or offset 0 (raw BMP with .ozb extension)
+    let bmpOffset = -1;
+    if (data[4] === 0x42 && data[5] === 0x4D) bmpOffset = 4;
+    else if (data[0] === 0x42 && data[1] === 0x4D) bmpOffset = 0;
+
+    if (bmpOffset === -1) {
       throw new Error('Not a valid OZB file (no BMP data found)');
     }
 
-    const bmpData = data.slice(4);
+    const bmpData = data.slice(bmpOffset);
     const blob = new Blob([bmpData], { type: 'image/bmp' });
     return { url: URL.createObjectURL(blob), format: 'OZB (BMP)', cleanup: true };
   }

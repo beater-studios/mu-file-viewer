@@ -8,38 +8,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!grid) return;
 
-  // Queue system to limit concurrent loads
-  const MAX_CONCURRENT = 4;
-  let activeLoads = 0;
-  const queue = [];
+  const loader = new PriorityLoader({ maxConcurrent: 4 });
+  grid._priorityLoader = loader;
 
-  function enqueueLoad(card) {
-    queue.push(card);
-    processQueue();
-  }
-
-  function processQueue() {
-    while (activeLoads < MAX_CONCURRENT && queue.length > 0) {
-      const card = queue.shift();
-      activeLoads++;
-      loadThumbnail(card).finally(() => {
-        activeLoads--;
-        processQueue();
-      });
-    }
-  }
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        enqueueLoad(entry.target);
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { rootMargin: '200px' });
+  loader.setLoadFn((card) => {
+    return loadThumbnail(card);
+  });
 
   document.querySelectorAll('.file-card').forEach(card => {
-    observer.observe(card);
+    loader.observe(card);
   });
 
   async function loadThumbnail(card) {

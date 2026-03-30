@@ -41,21 +41,14 @@ include __DIR__ . '/includes/header.php';
 <p class="file-count"><?php echo count($audioFiles); ?> audio file(s) found</p>
 <div class="audio-list" id="audio-list">
     <?php foreach ($audioFiles as $file): ?>
-        <div class="audio-item" data-file="<?php echo htmlspecialchars($file['path']); ?>">
+        <?php $audioExt = strtolower(pathinfo($file['path'], PATHINFO_EXTENSION)); ?>
+        <div class="audio-item" data-file="<?php echo htmlspecialchars($file['path']); ?>" data-name="<?php echo htmlspecialchars(basename($file['path'])); ?>" data-ext="<?php echo $audioExt; ?>">
             <button class="audio-play-btn" title="Play">&#9654;</button>
             <div class="audio-details">
                 <div class="audio-name"><?php echo htmlspecialchars(basename($file['path'])); ?></div>
                 <div class="audio-path"><?php echo htmlspecialchars(dirname($file['path']) === '.' ? '' : dirname($file['path'])); ?></div>
             </div>
             <div class="audio-size"><?php echo formatFileSize($file['size']); ?></div>
-            <audio preload="none">
-                <?php $audioExt = strtolower(pathinfo($file['path'], PATHINFO_EXTENSION)); ?>
-                <?php
-                    $mimeMap = ['ogg' => 'audio/ogg', 'wav' => 'audio/wav', 'mp3' => 'audio/mpeg'];
-                    $mime = $mimeMap[$audioExt] ?? 'audio/mpeg';
-                ?>
-                <source src="serve_file.php?file=<?php echo urlencode($file['path']); ?>" type="<?php echo $mime; ?>">
-            </audio>
         </div>
     <?php endforeach; ?>
 </div>

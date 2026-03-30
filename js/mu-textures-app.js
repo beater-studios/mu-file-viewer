@@ -8,36 +8,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!grid) return;
 
-  const MAX_CONCURRENT = 4;
-  let activeLoads = 0;
-  const queue = [];
+  const loader = new PriorityLoader({ maxConcurrent: 4 });
+  grid._priorityLoader = loader;
 
-  function enqueueLoad(card) {
-    queue.push(card);
-    processQueue();
-  }
+  loader.setLoadFn((card) => {
+    return loadThumbnail(card);
+  });
 
-  function processQueue() {
-    while (activeLoads < MAX_CONCURRENT && queue.length > 0) {
-      const card = queue.shift();
-      activeLoads++;
-      loadThumbnail(card).finally(() => {
-        activeLoads--;
-        processQueue();
-      });
-    }
-  }
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        enqueueLoad(entry.target);
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { rootMargin: '200px' });
-
-  document.querySelectorAll('.oz-card').forEach(card => observer.observe(card));
+  document.querySelectorAll('.oz-card').forEach(card => loader.observe(card));
 
   function downloadResult(result, baseName) {
     if (result.element.tagName === 'CANVAS') {

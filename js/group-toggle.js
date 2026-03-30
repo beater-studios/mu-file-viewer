@@ -31,11 +31,12 @@ function initGroupToggle(gridId, cardSelector) {
   function filterCards(query) {
     const cards = grid.querySelectorAll(cardSelector);
     let visibleCount = 0;
+    const matched = [];
     cards.forEach(card => {
       const name = (card.dataset.name || card.dataset.file || '').toLowerCase();
       const match = !query || name.includes(query);
       card.style.display = match ? '' : 'none';
-      if (match) visibleCount++;
+      if (match) { visibleCount++; matched.push(card); }
     });
 
     // Update group headers counts when grouped
@@ -47,6 +48,15 @@ function initGroupToggle(gridId, cardSelector) {
       if (countBadge) countBadge.textContent = groupVisible;
       group.style.display = groupVisible === 0 ? 'none' : '';
     });
+
+    // Prioritize matched cards in the loader queue
+    if (grid._priorityLoader) {
+      if (query && matched.length > 0) {
+        grid._priorityLoader.prioritize(matched);
+      } else {
+        grid._priorityLoader.clearPriority();
+      }
+    }
   }
 
   // Group toggle button
